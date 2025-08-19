@@ -1,0 +1,25 @@
+{
+  "name": "oauth2",
+  "version": "1.0.0",
+  "description": "learning OAth2 authentication",
+  "homepage": "https://github.com/piyushrai7271/OAuth2#readme",
+  "bugs": {
+    "url": "https://github.com/piyushrai7271/OAuth2/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/piyushrai7271/OAuth2.git"
+  },
+  "license": "ISC",
+  "author": "piyush rai",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "mongoose": "^8.17.2"
+  }
+}
