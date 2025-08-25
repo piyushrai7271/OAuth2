@@ -26,22 +26,26 @@ const userSchema = new mongoose.Schema({
     },
     password:{
         type:String,
-        require:[true,"Password is required"]
+        required:[true,"Password is required"]
     },
     refreshToken:{
         type:String
     }
 },{timestamps:true});
 
-userSchema.pre("save", async function (next){
-    if(!this.isModified("password")) return next ();
-
-    this.password = await bcrypt.hash(this.password,10)
-    next ();
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  try {
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
+
 userSchema.methods.isPasswordCorrect = async function (inputPassword){
-    if(!commingPassword){
+    if(!inputPassword){
          throw Error("Password is not comming")
     }
     return await bcrypt.compare(inputPassword.toString(),this.password);

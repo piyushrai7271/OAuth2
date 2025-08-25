@@ -25,11 +25,14 @@ const register = async (req, res) => {
     }
 
     //find user with email
-    const existingUser = await User.find(email);
+    const existingUser = await User.findOne({
+      $or: [{ email }, { userName }, { mobileNumber }],
+    });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exist with this email",
+        message:
+          "User with this email, username, or mobile number already exists",
       });
     }
 
@@ -53,7 +56,7 @@ const register = async (req, res) => {
     }
 
     // return response
-    return res.status(200).json({
+    return res.status(201).json({
       success: true,
       message: "User regestered successfully !!!",
       data: createdUser,
@@ -80,7 +83,7 @@ const login = async (req, res) => {
     }
 
     //find user with email
-    const user = await User.find(email);
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -110,18 +113,19 @@ const login = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
-      SameSite: None,
+      SameSite:"None",
     };
 
     // send success response
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      .cookie("accessToken",accessToken,options)
+      .cookie("refreshToken",refreshToken,options)
       .json({
         success: true,
         message: "User loged In successfull !!",
-        LoggerInUser,
+        accessToken:accessToken,
+        LoggerInUser
       });
   } catch (error) {
     console.error("Error in login :", error);
@@ -195,49 +199,38 @@ const changePassword = async (req, res) => {
 };
 const logOut = async (req, res) => {
   try {
-    const userId = req.userId;
-
-    //Validate user ID
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "Unauthorized user or user ID is missing",
-      });
+    await User.findByIdAndUpdate(
+    req.userId,
+    {
+      $set: {
+        refreshToken: undefined,
+      },
+    },
+    {
+      new: true,
     }
+  );
 
-    //  Find user
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+  const options = {
+    httpOnly: true,
+    secure: true,
+    SameSite:"None"
+  };
 
-    //Clear refresh token from DB (important for security)
-    user.refreshToken = null;
-    await user.save({ validateBeforeSave: false });
-
-    const options = {
-      httpOnly: true,
-      secure: true,
-      SameSite: None,
-    };
-
-    return res
-      .status(200)
-      .clearCookie("accessToken", accessToken, options)
-      .clearCookie("refreshToken", refreshToken, options)
-      .json({
-        success: true,
-        message: "User Loged out successfully !!",
-      });
-  } catch (error) {
-    console.error(`Error while Logging Out user : ${error}`);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server Error !!",
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json({
+        success:true,
+        message:"User Logout successfully !!"
     });
+  } catch (error) {
+    console.error("Error in logout ",error);
+    return res.status(500).json({
+        success:false,
+        message:"Internal server error !!"
+    })
   }
 };
 
