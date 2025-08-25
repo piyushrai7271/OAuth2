@@ -24,10 +24,6 @@ const userSchema = new mongoose.Schema({
         trim:true,
         match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"]
     },
-    profileImage:{
-        type:String,
-        default:"",
-    },
     password:{
         type:String,
         require:[true,"Password is required"]
