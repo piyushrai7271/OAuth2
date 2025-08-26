@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -8,19 +9,39 @@ export default function Signup() {
     mobileNumber: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Signup Data:", formData);
-    // TODO: call your API then navigate("/login");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5100/api/user/register",
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      console.log("Signup Success:", res.data);
+      navigate("/login"); // redirect to login after success
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="w-full max-w-md bg-slate-800/80 p-8 rounded-2xl shadow-lg">
       <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+
+      {error && <p className="text-red-400 text-center mb-2">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -66,9 +87,10 @@ export default function Signup() {
 
         <button
           type="submit"
-          className="w-full py-2 rounded-full bg-pink-600 hover:bg-pink-700 font-semibold"
+          disabled={loading}
+          className="w-full py-2 rounded-full bg-pink-600 hover:bg-pink-700 font-semibold disabled:opacity-50"
         >
-          Sign Up
+          {loading ? "Signing up..." : "Sign Up"}
         </button>
       </form>
 

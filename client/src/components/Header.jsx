@@ -5,7 +5,7 @@ export default function Header() {
     <header className="w-full sticky top-0 z-10 bg-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
         <Link to="/" className="text-2xl font-extrabold text-white">
-          My App
+          Oauth 2.0
         </Link>
 
         <nav className="flex items-center gap-6">
