@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ChangePassword from "./pages/ChangePassword"; 
 
 function App() {
   return (
@@ -29,6 +30,14 @@ function App() {
           element={
             <Layout>
               <Signup />
+            </Layout>
+          }
+        />
+        <Route
+          path="/change-password" // <-- Add this route
+          element={
+            <Layout>
+              <ChangePassword />
             </Layout>
           }
         />
