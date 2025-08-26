@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { login } = useAuth(); // <-- use auth context
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,13 +22,21 @@ export default function Login() {
       const res = await axios.post(
         "http://localhost:5100/api/user/login",
         formData,
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true, // send cookies if backend uses them
+        }
       );
 
-      // Login successful
       console.log("Login Success:", res.data);
-      // localStorage.setItem("token", res.data.token);  // if token provided
-      navigate("/"); // Redirect to home/dashboard
+
+      // Save token (if backend returns accessToken)
+      if (res.data.accessToken) {
+        localStorage.setItem("token", res.data.accessToken);
+      }
+
+      login(); // update AuthContext
+      navigate("/"); // redirect to home
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
@@ -34,10 +44,11 @@ export default function Login() {
     }
   };
 
-  // OAuth handlers (still placeholders)
   const handleOAuthLogin = (provider) => {
     window.location.href = `http://localhost:5100/auth/${provider}`;
   };
+
+  // rest of your JSX remains same...
 
   return (
     <div className="w-full max-w-md bg-slate-800/80 p-8 rounded-2xl shadow-lg">
@@ -69,7 +80,9 @@ export default function Login() {
           <label className="flex items-center gap-2">
             <input type="checkbox" /> Remember me
           </label>
-          <button type="button" className="text-pink-400">Forgot password</button>
+          <button type="button" className="text-pink-400">
+            Forgot password
+          </button>
         </div>
 
         <button
