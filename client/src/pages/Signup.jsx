@@ -1,0 +1,83 @@
+import { Link } from "react-router-dom";
+import { useState } from "react";
+
+export default function Signup() {
+  const [formData, setFormData] = useState({
+    userName: "",
+    email: "",
+    mobileNumber: "",
+    password: "",
+  });
+
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Signup Data:", formData);
+    // TODO: call your API then navigate("/login");
+  };
+
+  return (
+    <div className="w-full max-w-md bg-slate-800/80 p-8 rounded-2xl shadow-lg">
+      <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          name="userName"
+          placeholder="Username"
+          value={formData.userName}
+          onChange={handleChange}
+          className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+          required
+        />
+        <input
+          type="text"
+          name="mobileNumber"
+          placeholder="Mobile Number"
+          value={formData.mobileNumber}
+          onChange={handleChange}
+          className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+          required
+        />
+
+        <label className="flex items-center gap-2 text-slate-300 text-sm">
+          <input type="checkbox" required /> I agree with privacy and policy
+        </label>
+
+        <button
+          type="submit"
+          className="w-full py-2 rounded-full bg-pink-600 hover:bg-pink-700 font-semibold"
+        >
+          Sign Up
+        </button>
+      </form>
+
+      <p className="mt-6 text-center text-slate-300">
+        Already have an account?{" "}
+        <Link to="/login" className="text-pink-400">
+          Sign in
+        </Link>
+      </p>
+    </div>
+  );
+}
