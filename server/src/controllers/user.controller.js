@@ -113,19 +113,19 @@ const login = async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
-      SameSite:"None",
+      SameSite: "None",
     };
 
     // send success response
     return res
       .status(200)
-      .cookie("accessToken",accessToken,options)
-      .cookie("refreshToken",refreshToken,options)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
       .json({
         success: true,
         message: "User loged In successfull !!",
-        accessToken:accessToken,
-        LoggerInUser
+        accessToken: accessToken,
+        LoggerInUser,
       });
   } catch (error) {
     console.error("Error in login :", error);
@@ -197,41 +197,174 @@ const changePassword = async (req, res) => {
     });
   }
 };
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // ✅ Validate email presence
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // ✅ Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    // ✅ Find user by email
+    const user = await User.findOne({ email });
+
+    // Always respond with generic message, even if user doesn't exist
+    if (!user) {
+      // Simulate sending email for non-existent user to prevent email enumeration
+      return res.status(200).json({
+        success: true,
+        message:
+          "If the email is registered, you will receive a password reset link shortly.",
+      });
+    }
+
+    // ✅ Send password reset email
+    const result = await sendPasswordResetEmail(user);
+
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message:
+          "If the email is registered, you will receive a password reset link shortly.",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send reset link. Please try again later.",
+      });
+    }
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+const resetPassword = async (req, res) => {
+  try {
+    const { newPassword, confirmPassword } = req.body;
+    const { token } = req.params; // ⬅️ Get token from URL params
+
+    // ✅ Validate required fields
+    if (!token || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Token, password, and confirmPassword are required.",
+      });
+    }
+
+    // ✅ Validate password format
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      });
+    }
+
+    // ✅ Check password match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Password and confirmPassword do not match.",
+      });
+    }
+
+    // ✅ Verify token
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.RESET_PASSWORD_SECRET);
+    } catch (err) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired token.",
+      });
+    }
+
+    // ✅ Find user by token payload
+    const user = await User.findById(payload.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // ✅ Update and hash new password (will trigger pre-save middleware)
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Password has been reset successfully. You can now log in with your new password.",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};
 const logOut = async (req, res) => {
   try {
     await User.findByIdAndUpdate(
-    req.userId,
-    {
-      $set: {
-        refreshToken: undefined,
+      req.userId,
+      {
+        $set: {
+          refreshToken: undefined,
+        },
       },
-    },
-    {
-      new: true,
-    }
-  );
+      {
+        new: true,
+      }
+    );
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-    SameSite:"None"
-  };
+    const options = {
+      httpOnly: true,
+      secure: true,
+      SameSite: "None",
+    };
 
-  return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
-    .json({
-        success:true,
-        message:"User Logout successfully !!"
-    });
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({
+        success: true,
+        message: "User Logout successfully !!",
+      });
   } catch (error) {
-    console.error("Error in logout ",error);
+    console.error("Error in logout ", error);
     return res.status(500).json({
-        success:false,
-        message:"Internal server error !!"
-    })
+      success: false,
+      message: "Internal server error !!",
+    });
   }
 };
 
-export { register, login, changePassword, logOut };
+export {
+  register,
+  login,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+  logOut,
+};
