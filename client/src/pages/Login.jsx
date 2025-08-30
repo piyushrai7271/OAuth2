@@ -2,13 +2,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext.jsx";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); // <-- show/hide state
   const navigate = useNavigate();
-  const { login } = useAuth(); // <-- use auth context
+  const { login } = useAuth();
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,19 +26,16 @@ export default function Login() {
         formData,
         {
           headers: { "Content-Type": "application/json" },
-          withCredentials: true, // send cookies if backend uses them
+          withCredentials: true,
         }
       );
 
-      console.log("Login Success:", res.data);
-
-      // Save token (if backend returns accessToken)
       if (res.data.accessToken) {
         localStorage.setItem("token", res.data.accessToken);
       }
 
-      login(); // update AuthContext
-      navigate("/"); // redirect to home
+      login();
+      navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
@@ -48,8 +47,6 @@ export default function Login() {
     window.location.href = `http://localhost:5100/auth/${provider}`;
   };
 
-  // rest of your JSX remains same...
-
   return (
     <div className="w-full max-w-md bg-slate-800/80 p-8 rounded-2xl shadow-lg">
       <h2 className="text-2xl font-bold text-center mb-6">Log In</h2>
@@ -57,6 +54,7 @@ export default function Login() {
       {error && <p className="text-red-400 text-center mb-2">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Email Input */}
         <input
           type="email"
           name="email"
@@ -66,25 +64,41 @@ export default function Login() {
           className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
           required
         />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-          required
-        />
 
+        {/* Password Input with show/hide */}
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400 pr-10"
+            required
+          />
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-2.5 cursor-pointer text-slate-300"
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+
+        {/* Remember me + Forgot password */}
         <div className="flex justify-between text-sm text-slate-300">
           <label className="flex items-center gap-2">
             <input type="checkbox" /> Remember me
           </label>
-          <button type="button" className="text-pink-400">
+          <button
+            type="button"
+            onClick={() => navigate("/forget-password")}
+            className="text-pink-400"
+          >
             Forgot password
           </button>
         </div>
 
+        {/* Login Button */}
         <button
           type="submit"
           disabled={loading}

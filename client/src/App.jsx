@@ -3,7 +3,9 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import ChangePassword from "./pages/ChangePassword"; 
+import ChangePassword from "./pages/ChangePassword";
+import ForgetPassword from "./pages/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -38,6 +40,22 @@ function App() {
           element={
             <Layout>
               <ChangePassword />
+            </Layout>
+          }
+        />
+        <Route
+          path="/forget-password"
+          element={
+            <Layout>
+              <ForgetPassword />
+            </Layout>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <Layout>
+              <ResetPassword />
             </Layout>
           }
         />

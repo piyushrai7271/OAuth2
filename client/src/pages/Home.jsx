@@ -11,8 +11,8 @@ export default function Home() {
         </h1>
       ) : (
         <>
-          <h1 className="text-4xl font-bold">Welcome</h1>
-          <p className="mt-2 text-slate-300">Use the top-right links to login or sign up.</p>
+          <h1 className="text-4xl font-bold hover:text-pink-300">Welcome To Oauth 2.0</h1>
+          <p className="mt-2 text-slate-400 hover:text-pink-300">Use the top-right links to login or sign up.</p>
         </>
       )}
     </div>
