@@ -12,9 +12,3 @@ connectDb()
    .catch((error) =>{
      console.log('Error starting the server : ', error);
    })
-
-
-
-
-
-
