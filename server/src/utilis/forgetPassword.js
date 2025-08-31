@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 import {
   resetPasswordEmailHTML,
   resetPasswordEmailText,
-} from "./emailTemplates/resetPasswordEmail.js";
+} from "./forgetpasswordTemplete.js";
 
 const sendPasswordResetEmail = async (user) => {
   const frontendBaseURL = process.env.CORS_ORIGIN;
@@ -22,13 +22,18 @@ const sendPasswordResetEmail = async (user) => {
 
   try {
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      {
+        id: user._id,
+        email: user.email,
+      },
       process.env.RESET_PASSWORD_SECRET,
-      { expiresIn: process.env.RESET_PASSWORD_EXPIRY || "1h" }
+      {
+        expiresIn: process.env.RESET_PASSWORD_EXPIRY || "1h",
+      }
     );
-    console.log("Generated JWT token for password reset:", token); // Debugging line
+    // console.log("Generated JWT token for password reset:", token); // Debugging line
     const resetLink = `${frontendBaseURL}/reset-password/${token}`;
-    const displayName = user.fullName || user.username || "User";
+    const displayName = user.fullName || user.userName || "User";
 
     const transport = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -42,9 +47,9 @@ const sendPasswordResetEmail = async (user) => {
     });
 
     const mailOptions = {
-      from: `"CTRD Technology" <${process.env.EMAIL_USER}>`,
+      from: `"Oauth 2.0 Testing" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: "Reset Your CTRD Technology Password",
+      subject: "Reset Your Oauth 2.0 Testing Password",
       html: resetPasswordEmailHTML(displayName, resetLink),
       text: resetPasswordEmailText(displayName, resetLink),
     };

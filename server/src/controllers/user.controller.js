@@ -1,4 +1,6 @@
 import User from "../models/user.model.js";
+import jwt from "jsonwebtoken";
+import { sendPasswordResetEmail } from "../utilis/forgetPassword.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -312,14 +314,14 @@ const resetPassword = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message:
-        "Password has been reset successfully. You can now log in with your new password.",
+      message:"Password reset Successfully !! ",
     });
   } catch (error) {
     console.error("Reset password error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error.",
+      error:error.message
     });
   }
 };

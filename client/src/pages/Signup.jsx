@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
 import axios from "axios";
 
@@ -11,6 +12,7 @@ export default function Signup() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -22,11 +24,9 @@ export default function Signup() {
     setError(null);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5100/api/user/register",
-        formData,
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const res = await axios.post("/api/user/register", formData, {
+        headers: { "Content-Type": "application/json" },
+      });
 
       console.log("Signup Success:", res.data);
       navigate("/login"); // redirect to login after success
@@ -71,15 +71,23 @@ export default function Signup() {
           className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
           required
         />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded-full bg-slate-700 text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+            required
+          />
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-2.5 cursor-pointer text-slate-300"
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
 
         <label className="flex items-center gap-2 text-slate-300 text-sm">
           <input type="checkbox" required /> I agree with privacy and policy

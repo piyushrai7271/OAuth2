@@ -22,7 +22,7 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5100/api/user/login",
+        "/api/user/login",
         formData,
         {
           headers: { "Content-Type": "application/json" },

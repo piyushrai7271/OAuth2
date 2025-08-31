@@ -1,14 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ForgetPassword = () => {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Call backend API to send reset link
-    console.log("Reset link sent to:", email);
+    setLoading(true);
+    setMessage("");
+    setError("");
+
+    try {
+      // ✅ Send request to backend (via proxy)
+      const response = await axios.post("/api/user/forgot-password", { email });
+
+      // ✅ Handle success message from backend
+      if (response.data.success) {
+        setMessage(response.data.message);
+      } else {
+        setError(response.data.message || "Something went wrong");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Server error, please try again later"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,13 +51,23 @@ const ForgetPassword = () => {
           />
           <button
             type="submit"
-            className="w-full p-3 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+            disabled={loading}
+            className={`w-full p-3 rounded-full font-semibold transition ${
+              loading
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
           >
-            Send Reset Link
+            {loading ? "Sending..." : "Send Reset Link"}
           </button>
         </form>
+
+        {/* ✅ Success / Error Messages */}
+        {message && <p className="text-green-400 mt-4 text-center">{message}</p>}
+        {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
+
         <button
-          onClick={() => navigate("/login")}  // <-- navigate to login page
+          onClick={() => navigate("/login")}
           className="w-full p-3 mt-4 rounded-full bg-gray-700 text-white hover:bg-gray-800 transition"
         >
           Back to Login

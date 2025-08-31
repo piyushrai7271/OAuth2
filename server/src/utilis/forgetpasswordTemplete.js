@@ -1,6 +1,6 @@
 export const resetPasswordEmailHTML = (displayName, resetLink) => `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;border:1px solid #e0e0e0;border-radius:8px;">
-    <h1 style="text-align:center;color:#222;margin:0 0 10px;font-weight:700;">CTRD Technology</h1>
+    <h1 style="text-align:center;color:#222;margin:0 0 10px;font-weight:700;">Oauth 2.0</h1>
     <h2 style="text-align:center;color:#333;margin-top:0;">Reset your password</h2>
     <p>Hello ${displayName},</p>
     <p>We received a request to reset your password. Click the button below to reset it:</p>
@@ -10,7 +10,7 @@ export const resetPasswordEmailHTML = (displayName, resetLink) => `
       </a>
     </div>
     <p>This link will expire in 1 hour. If you didn’t request this, you can safely ignore this email.</p>
-    <p>Thanks,<br/>The CTRD Technology Team</p>
+    <p>Thanks,<br/>The Oauth 2.0 Team</p>
   </div>
 `;
 
@@ -24,5 +24,5 @@ ${resetLink}
 This link will expire in 1 hour. If you didn’t request this, you can safely ignore this email.
 
 Thanks,
-The CTRD Technology Team
+The Oauth 2.0 Team
 `;

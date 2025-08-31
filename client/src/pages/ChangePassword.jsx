@@ -29,7 +29,7 @@ export default function ChangePassword() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5100/api/user/change-password",
+        "/api/user/change-password",
         formData,
         {
           headers: {
