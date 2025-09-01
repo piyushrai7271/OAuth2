@@ -325,6 +325,46 @@ const resetPassword = async (req, res) => {
     });
   }
 };
+const getUserDetails = async (req, res) =>{
+   try {
+     const userId = req.userId;
+
+     //validate userId 
+     if(!userId){
+       return res.status(404).json({
+         success:false,
+         message:"User id didn't got"
+       })
+     }
+
+     //find user by Id
+     const user = await User.findById(userId);
+     if(!user){
+      return res.status(404).json({
+        success:false,
+        message:"User not found with id"
+      })
+     }
+
+     //return response
+     return res.status(200).json({
+      success:true,
+      message:"user data found successfully !!",
+      data :{
+        id: user._id,
+        userName: user.userName,
+        email: user.email,
+        mobileNumber: user.mobileNumber
+      }
+     })
+   } catch (error) {
+    console.error(`Error in geting user details : ${error}`);
+    return res.status(500).json({
+      success:false,
+      message:"Internal server Error !!"
+    })
+   }
+}
 const logOut = async (req, res) => {
   try {
     await User.findByIdAndUpdate(
@@ -368,5 +408,6 @@ export {
   changePassword,
   forgotPassword,
   resetPassword,
+  getUserDetails,
   logOut,
 };
