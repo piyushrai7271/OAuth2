@@ -365,6 +365,81 @@ const getUserDetails = async (req, res) =>{
     })
    }
 }
+const googleCallback = async (req, res) => {
+  try {
+    // req.user comes from Passport's Google strategy
+    const user = req.userId;
+    if (!user?._id) {
+      return res.redirect(`${FRONTEND_BASE_URL}/login?error=OAuthUserMissing`);
+    }
+
+    // Generate tokens
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
+
+    // Persist refreshToken if required
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Cookie options directly here
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,       // Always secure for production
+      sameSite: "None",   // For cross-site cookies if needed
+    };
+
+    // Set Access Token cookie (15 min)
+    res.cookie("accessToken", accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 min
+    });
+
+    // Set Refresh Token cookie (30 days)
+    res.cookie("refreshToken", refreshToken, {
+      ...cookieOptions,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    // Redirect to frontend dashboard after successful login
+    return res.redirect(`${FRONTEND_BASE_URL}/dashboard`);
+
+  } catch (err) {
+    console.error("Google callback error:", err);
+    return res.redirect(`${FRONTEND_BASE_URL}/login?error=OAuthFailed`);
+  }
+};
+const unlinkGoogle = async (req, res) => {
+  try {
+    const user = req.user;
+
+    //validate comming user
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Prevent lockout: must set a password before unlinking
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message: "Set a password before unlinking Google.",
+      });
+    }
+
+    user.googleId = undefined;
+    user.authProvider = "local";
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({
+       success: true,
+       message: "Google unlinked successfully." 
+      });
+  } catch (error) {
+    console.error("unlinkGoogle error:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Internal server error"
+    });
+  }
+};
 const logOut = async (req, res) => {
   try {
     await User.findByIdAndUpdate(
@@ -409,5 +484,7 @@ export {
   forgotPassword,
   resetPassword,
   getUserDetails,
+  googleCallback,
+  unlinkGoogle,
   logOut,
 };

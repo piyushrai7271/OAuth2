@@ -29,11 +29,24 @@ const userSchema = new mongoose.Schema({
     },
     refreshToken:{
         type:String
+    },
+    googleId: {
+      type: String,
+      index: true,
+      sparse: true // allows multiple nulls
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google", "mixed"], // local = email/pass, google = only Google, mixed = both
+      default: "local"
+    },
+    avatar: {
+      type: String // store Google profile picture if available
     }
 },{timestamps:true});
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password") || !this.password) return next();
   try {
     this.password = await bcrypt.hash(this.password, 10);
     next();
