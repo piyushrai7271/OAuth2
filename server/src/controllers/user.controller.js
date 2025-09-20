@@ -365,6 +365,75 @@ const getUserDetails = async (req, res) =>{
     })
    }
 }
+const refreshAccessToken = async (req,res) =>{
+   
+    const incomingRefreshToken =
+    req.cookies?.refreshToken || req.body.refreshToken;
+
+  // Validate incoming refresh token
+  if (!incomingRefreshToken) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: No refresh token provided",
+    });
+  }
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    )
+    if(!decodedToken){
+      return res.status(401).json({
+         success:false,
+         message:"Invalid refresh token"
+      })
+    }
+
+    // find user
+  const user = await User.findById(decodedToken?._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Compare tokens
+    if(user.refreshToken !== incomingRefreshToken){
+       return res.status(403).json({
+          success: false,
+          message: "Refresh token does not match"
+       })
+    }
+
+    // Generate new access token
+    const accessToken = user.generateAccessToken();
+
+     const options = {
+      httpOnly: true,
+      secure: true,
+      SameSite: "None",
+    };
+
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .json({
+        success: true,
+        message: "New access token issued",
+        accessToken, // 👈 frontend uses this
+      });
+  } catch (error) {
+     console.error("❌ refreshAccessToken error:", error.message);
+    return res.status(403).json({
+      success: false,
+      message: "Invalid or expired refresh token",
+      error: error.message,
+    });
+  }
+};
 const logOut = async (req, res) => {
   try {
     await User.findByIdAndUpdate(
@@ -409,5 +478,6 @@ export {
   forgotPassword,
   resetPassword,
   getUserDetails,
+  refreshAccessToken,
   logOut,
 };
